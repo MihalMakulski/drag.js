@@ -1,27 +1,33 @@
 function drag(el, dropzoneElArr){
-  el.addEventListener('mousedown', function(e){
+
+  var startX, startY, rectEl;
+
+  function startDrag(ev) {
+    rectEl = el.getBoundingClientRect()
     el.style.position = "relative";   
-    var startX, startY;
-    var rectEl = el.getBoundingClientRect();
     startX = rectEl.left;
     startY = rectEl.top;
     el.classList.add('dragged');  
-    el.onmousemove = function(e){ 
-     for(i=0; i<dropzoneElArr.length; i++){   
+    el.addEventListener('mousemove', dragged, false);
+  }
+
+  function dragged(ev) {
+    for(i=0; i<dropzoneElArr.length; i++){   
       var rectDropzone = dropzoneElArr[i].getBoundingClientRect();   
-      var over = (e.clientX > rectDropzone.left) && (e.clientY > rectDropzone.top);
-      var leave = (e.clientX < rectDropzone.left + rectDropzone.width) && (e.clientY  < rectDropzone.top + rectDropzone.height);       
-      el.style.left = e.clientX - startX - rectEl.width / 2 + "px";
-      el.style.top = e.clientY - startY - rectEl.height / 2 + "px";
+      var over = (ev.clientX > rectDropzone.left) && (ev.clientY > rectDropzone.top);
+      var leave = (ev.clientX < rectDropzone.left + rectDropzone.width) && (ev.clientY  < rectDropzone.top + rectDropzone.height);       
+      el.style.left = ev.clientX - startX - rectEl.width / 2 + "px";
+      el.style.top = ev.clientY - startY - rectEl.height / 2 + "px";
       if( over && leave ){
          dropzoneElArr[i].classList.add('active');        
       }else {
          dropzoneElArr[i].classList.remove('active');
       }        
-     }
-    }; 
-    el.onmouseup = function(e){
-     for(i=0; i<dropzoneElArr.length; i++){   
+    }
+  }
+
+  function endDrag(ev){
+    for(i=0; i<dropzoneElArr.length; i++){   
       if (dropzoneElArr[i].classList.contains('active')){  
         el.style.position = "static";
         el.style.left = "";
@@ -33,9 +39,12 @@ function drag(el, dropzoneElArr){
           el.style.left = "";
           el.style.top = "";      
       }   
-      el.onmousemove = null;
       el.classList.remove('dragged');
-     }
-    };
-  }, false);
+      el.removeEventListener('mousemove', dragged, false);
+    }
+  }
+
+  el.addEventListener('mousedown', startDrag, false);
+  el.addEventListener('mouseup', endDrag, false);
+
 }
